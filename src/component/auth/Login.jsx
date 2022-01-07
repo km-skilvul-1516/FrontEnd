@@ -1,17 +1,31 @@
-import { Form, Input, Button, Dropdown } from "antd";
-import { useDispatch } from "react-redux";
-import { post_login, post_register } from "../../redux/actions/index";
+import { Form, Input, Button, Dropdown, Radio } from "antd";
+import { useDispatch, useSelector } from "react-redux";
+import { post_login, post_register, get_quiz } from "../../redux/actions/index";
 //hiraukan
 import { Link, useHistory } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 const Login = () => {
   const dispatch = useDispatch();
-  //hiraukan
+  const [countSoal, setCount] = useState(0);
+
+  useEffect(() => {
+    dispatch(get_quiz());
+  }, [dispatch])
+
   const history = useHistory();
+  const mainState = useSelector(state => state?.main)
+  const soal = mainState?.soal
   
+  console.log('inisoal', soal);
   const login = (values) => {
     dispatch(post_login(values, history));
   };
+
+  const logger = (changedValues) => {
+    console.log(changedValues);
+  };
+
 
   return (
     <div>
@@ -21,20 +35,36 @@ const Login = () => {
           remember: true,
         }}
         onFinish={login}
+        onValuesChange={logger}
         style={{ width: "79%", marginTop: 50, marginLeft: 30 }}
         size="large"
       >
-        <Form.Item label="Username" name="username">
-          <Input />
-        </Form.Item>
+        {
+          !soal ?
+          null
+          :
+          soal.map((soal) => {
+            return(
+              soal.isiQuiz.map((isiSoal) => {
+                console.log(isiSoal)
+                return(
+                  <Form.Item name="soal-1" label={isiSoal.soal}>
+                  <Radio.Group>
+                    <Radio value="a">{isiSoal.pilihanA}</Radio>
+                    <Radio value="b">{isiSoal.pilihanB}</Radio>
+                    <Radio value="c">{isiSoal.pilihanC}</Radio>
+                    <Radio value="d">{isiSoal.pilihanD}</Radio>
+                  </Radio.Group>
+                  </Form.Item>
+                )
+              })
+            )
 
-        <Form.Item label="Password" name="password">
-          <Input.Password />
-        </Form.Item>
-
+          })
+        }      
         <Form.Item>
           <Button type="primary" htmlType="submit">
-            Submit
+            Submit Answer
           </Button>
         </Form.Item>
       </Form>
